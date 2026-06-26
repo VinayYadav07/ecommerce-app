@@ -1,0 +1,141 @@
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { Row, Col, Card, Button, Spinner } from "react-bootstrap";
+import { useCart } from "../store/CartContext";
+import AddMovieForm from "./AddMovieForm"; // ✅ Line 4 - Import AddMovieForm
+
+function Products() {
+  const [products, setProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [retryCount, setRetryCount] = useState(0);
+  const { addToCart } = useCart();
+
+  const retryIntervalRef = useRef(null);
+  const isMountedRef = useRef(true);
+
+  const fetchProducts = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const response = await fetch("https://fakestoreapi.com/products?limit=4");
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      if (isMountedRef.current) {
+        setProducts(data);
+        setIsLoading(false);
+        setError(null);
+        if (retryIntervalRef.current) {
+          clearInterval(retryIntervalRef.current);
+          retryIntervalRef.current = null;
+        }
+      }
+    } catch (err) {
+      console.error("Fetch error:", err);
+
+      if (isMountedRef.current) {
+        setError(`Something went wrong....Retrying (${retryCount + 1})`);
+        setIsLoading(false);
+
+        if (!retryIntervalRef.current) {
+          retryIntervalRef.current = setInterval(() => {
+            if (isMountedRef.current) {
+              setRetryCount((prev) => {
+                const newCount = prev + 1;
+                setError(`Something went wrong....Retrying (${newCount + 1})`);
+                return newCount;
+              });
+              fetchProducts();
+            }
+          }, 5000);
+        }
+      }
+    }
+  }, [retryCount]);
+
+  const cancelRetry = useCallback(() => {
+    if (retryIntervalRef.current) {
+      clearInterval(retryIntervalRef.current);
+      retryIntervalRef.current = null;
+    }
+    setError("Retry cancelled");
+    setIsLoading(false);
+  }, []);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    fetchProducts();
+
+    return () => {
+      isMountedRef.current = false;
+      if (retryIntervalRef.current) {
+        clearInterval(retryIntervalRef.current);
+        retryIntervalRef.current = null;
+      }
+    };
+  }, [fetchProducts]);
+
+  if (isLoading) {
+    return (
+      <div className="text-center py-5">
+        <Spinner animation="border" variant="primary" />
+        <p className="mt-2">Loading products...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-5">
+        <h4 className="text-danger">{error}</h4>
+        <Button variant="danger" onClick={cancelRetry} className="mt-3">
+          Cancel Retry
+        </Button>
+      </div>
+    );
+  }
+
+  // ✅ Return me AddMovieForm add karo (products ke upar)
+  return (
+    <>
+      <AddMovieForm />
+
+      <Row xs={1} md={2} lg={4} className="g-4">
+        {products.map((product) => (
+          <Col key={product.id}>
+            <Card className="h-100">
+              <Card.Img
+                variant="top"
+                src={product.image}
+                style={{ height: "200px", objectFit: "contain" }}
+              />
+              <Card.Body>
+                <Card.Title>{product.title}</Card.Title>
+                <Card.Text>${product.price}</Card.Text>
+                <Button
+                  variant="primary"
+                  onClick={() =>
+                    addToCart({
+                      title: product.title,
+                      price: product.price,
+                      imageUrl: product.image,
+                    })
+                  }
+                >
+                  ADD TO CART
+                </Button>
+              </Card.Body>
+            </Card>
+          </Col>
+        ))}
+      </Row>
+    </>
+  );
+}
+
+export default React.memo(Products);
