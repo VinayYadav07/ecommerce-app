@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Row, Col, Card, Button, Spinner } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 import { useCart } from "../store/CartContext";
 import AddMovieForm from "./AddMovieForm";
 
@@ -9,6 +10,7 @@ function Products() {
   const [error, setError] = useState(null);
   const [retryCount, setRetryCount] = useState(0);
   const { addToCart } = useCart();
+  const navigate = useNavigate();
 
   const retryIntervalRef = useRef(null);
   const isMountedRef = useRef(true);
@@ -33,7 +35,7 @@ function Products() {
           id: item.id,
           title: item.title,
           price: Math.floor(Math.random() * 100) + 10,
-          imageUrl: "https://via.placeholder.com/200",
+          imageUrl: `https://picsum.photos/seed/${item.id}/200/200`,
         }));
 
         setProducts(productsArray);
@@ -68,7 +70,6 @@ function Products() {
     }
   }, [retryCount]);
 
-  // ✅ DELETE REQUEST - YAHAN DELETE HAI
   const deleteMovie = async (id) => {
     try {
       const response = await fetch(
@@ -114,6 +115,10 @@ function Products() {
     };
   }, [fetchProducts]);
 
+  const handleProductClick = (id) => {
+    navigate(`/product/${id}`);
+  };
+
   if (isLoading) {
     return (
       <div className="text-center py-5">
@@ -142,16 +147,25 @@ function Products() {
         {products.map((product) => (
           <Col key={product.id}>
             <Card className="h-100">
-              <Card.Img
-                variant="top"
-                src={product.imageUrl}
-                style={{ height: "200px", objectFit: "contain" }}
-              />
+              <div
+                onClick={() => handleProductClick(product.id)}
+                style={{ cursor: "pointer" }}
+              >
+                <Card.Img
+                  variant="top"
+                  src={product.imageUrl}
+                  style={{ height: "200px", objectFit: "cover" }}
+                  onError={(e) => {
+                    e.target.src =
+                      "https://via.placeholder.com/200?text=No+Image";
+                  }}
+                />
+                <Card.Body>
+                  <Card.Title>{product.title}</Card.Title>
+                  <Card.Text>${product.price}</Card.Text>
+                </Card.Body>
+              </div>
               <Card.Body>
-                <Card.Title>{product.title}</Card.Title>
-                <Card.Text>${product.price}</Card.Text>
-
-                {/* ✅ DELETE BUTTON - YAHAN DELETE BUTTON HAI */}
                 <Button
                   variant="danger"
                   size="sm"
