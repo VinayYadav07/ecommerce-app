@@ -8,9 +8,10 @@ function Navigation() {
   const { isLoggedIn, userEmail, logout } = useCart();
   const navigate = useNavigate();
 
+  // ✅ LOGUT FUNCTION - YAHAN HAI
   const handleLogout = () => {
-    logout();
-    navigate("/login");
+    logout(); // ✅ Token null + localStorage clear
+    navigate("/login"); // ✅ Redirect to login page
   };
 
   return (
@@ -54,6 +55,7 @@ function Navigation() {
           {isLoggedIn ? (
             <div className="d-flex align-items-center text-white">
               <span className="me-3">{userEmail}</span>
+              {/* ✅ LOGOUT BUTTON - YAHAN HAI */}
               <Button variant="outline-light" size="sm" onClick={handleLogout}>
                 Logout
               </Button>
