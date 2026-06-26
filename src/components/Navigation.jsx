@@ -34,12 +34,21 @@ function Navigation() {
             <Nav.Link as={NavLink} to="/contact">
               CONTACT US
             </Nav.Link>
-            <Nav.Link as={NavLink} to="/signup">
-              SIGN UP
-            </Nav.Link>
-            <Nav.Link as={NavLink} to="/login">
-              LOGIN
-            </Nav.Link>
+            {!isLoggedIn && (
+              <>
+                <Nav.Link as={NavLink} to="/signup">
+                  SIGN UP
+                </Nav.Link>
+                <Nav.Link as={NavLink} to="/login">
+                  LOGIN
+                </Nav.Link>
+              </>
+            )}
+            {isLoggedIn && (
+              <Nav.Link as={NavLink} to="/change-password">
+                CHANGE PASSWORD
+              </Nav.Link>
+            )}
           </Nav>
 
           {isLoggedIn ? (
