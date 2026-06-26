@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { Form, Button, Container, Row, Col } from "react-bootstrap";
 
-function AddMovieForm() {
+function AddMovieForm({ onMovieAdded }) {
   const [movieData, setMovieData] = useState({
     title: "",
     price: "",
     imageUrl: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -16,8 +17,9 @@ function AddMovieForm() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
     const newMovieObj = {
       title: movieData.title,
@@ -25,18 +27,43 @@ function AddMovieForm() {
       imageUrl: movieData.imageUrl || "https://via.placeholder.com/200",
     };
 
-    // ✅ Console me show karo
-    console.log("NewMovieObj:", newMovieObj);
+    try {
+      // ✅ POST Request - Fake API par save karo
+      const response = await fetch(
+        "https://jsonplaceholder.typicode.com/posts",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newMovieObj),
+        },
+      );
 
-    // ✅ Alert bhi add karte hain (confirm ke liye)
-    alert("Movie Added! Check console for NewMovieObj");
+      if (!response.ok) {
+        throw new Error("Failed to add movie");
+      }
 
-    // Form reset karo
-    setMovieData({
-      title: "",
-      price: "",
-      imageUrl: "",
-    });
+      const data = await response.json();
+      console.log("Movie added:", data);
+
+      if (onMovieAdded) {
+        onMovieAdded();
+      }
+
+      setMovieData({
+        title: "",
+        price: "",
+        imageUrl: "",
+      });
+
+      alert("Movie added successfully! Check console.");
+    } catch (error) {
+      console.error("Error adding movie:", error);
+      alert("Failed to add movie. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -83,8 +110,8 @@ function AddMovieForm() {
                 />
               </Form.Group>
 
-              <Button variant="primary" type="submit">
-                Add Movie
+              <Button variant="primary" type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Adding..." : "Add Movie"}
               </Button>
             </Form>
           </div>

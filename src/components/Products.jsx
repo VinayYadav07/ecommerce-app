@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Row, Col, Card, Button, Spinner } from "react-bootstrap";
 import { useCart } from "../store/CartContext";
-import AddMovieForm from "./AddMovieForm"; // ✅ Line 4 - Import AddMovieForm
+import AddMovieForm from "./AddMovieForm";
 
 function Products() {
   const [products, setProducts] = useState([]);
@@ -18,7 +18,9 @@ function Products() {
       setIsLoading(true);
       setError(null);
 
-      const response = await fetch("https://fakestoreapi.com/products?limit=4");
+      const response = await fetch(
+        "https://jsonplaceholder.typicode.com/posts?_limit=4",
+      );
 
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -27,9 +29,17 @@ function Products() {
       const data = await response.json();
 
       if (isMountedRef.current) {
-        setProducts(data);
+        const productsArray = data.map((item) => ({
+          id: item.id,
+          title: item.title,
+          price: Math.floor(Math.random() * 100) + 10,
+          imageUrl: "https://via.placeholder.com/200",
+        }));
+
+        setProducts(productsArray);
         setIsLoading(false);
         setError(null);
+
         if (retryIntervalRef.current) {
           clearInterval(retryIntervalRef.current);
           retryIntervalRef.current = null;
@@ -57,6 +67,30 @@ function Products() {
       }
     }
   }, [retryCount]);
+
+  // ✅ DELETE REQUEST - YAHAN DELETE HAI
+  const deleteMovie = async (id) => {
+    try {
+      const response = await fetch(
+        `https://jsonplaceholder.typicode.com/posts/${id}`,
+        {
+          method: "DELETE",
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete movie");
+      }
+
+      setProducts((prevProducts) =>
+        prevProducts.filter((product) => product.id !== id),
+      );
+      console.log("Movie deleted successfully");
+    } catch (error) {
+      console.error("Error deleting movie:", error);
+      alert("Failed to delete movie. Please try again.");
+    }
+  };
 
   const cancelRetry = useCallback(() => {
     if (retryIntervalRef.current) {
@@ -100,10 +134,9 @@ function Products() {
     );
   }
 
-  // ✅ Return me AddMovieForm add karo (products ke upar)
   return (
     <>
-      <AddMovieForm />
+      <AddMovieForm onMovieAdded={fetchProducts} />
 
       <Row xs={1} md={2} lg={4} className="g-4">
         {products.map((product) => (
@@ -111,19 +144,31 @@ function Products() {
             <Card className="h-100">
               <Card.Img
                 variant="top"
-                src={product.image}
+                src={product.imageUrl}
                 style={{ height: "200px", objectFit: "contain" }}
               />
               <Card.Body>
                 <Card.Title>{product.title}</Card.Title>
                 <Card.Text>${product.price}</Card.Text>
+
+                {/* ✅ DELETE BUTTON - YAHAN DELETE BUTTON HAI */}
+                <Button
+                  variant="danger"
+                  size="sm"
+                  className="me-2"
+                  onClick={() => deleteMovie(product.id)}
+                >
+                  Delete
+                </Button>
+
                 <Button
                   variant="primary"
+                  size="sm"
                   onClick={() =>
                     addToCart({
                       title: product.title,
                       price: product.price,
-                      imageUrl: product.image,
+                      imageUrl: product.imageUrl,
                     })
                   }
                 >
