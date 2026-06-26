@@ -9,8 +9,8 @@ import {
   Spinner,
 } from "react-bootstrap";
 import { createClient } from "@supabase/supabase-js";
+import { useCart } from "../store/CartContext";
 
-// ✅ Tumhari keys
 const supabaseUrl = "https://fsqrhukkqkuirglctmkj.supabase.co";
 const supabaseAnonKey = "sb_publishable_DfogggJlLwKWP8XzFSHYhQ_mrvbYOCa";
 
@@ -22,6 +22,7 @@ function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+  const { login } = useCart();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -38,9 +39,7 @@ function Login() {
       if (error) throw new Error(error.message);
 
       console.log("Login success:", data);
-
-      localStorage.setItem("token", data.session?.access_token || "");
-      localStorage.setItem("userEmail", data.user?.email || "");
+      login(data.session?.access_token, data.user?.email);
 
       setSuccess(true);
       setEmail("");
