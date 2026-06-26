@@ -1,4 +1,3 @@
-import React from "react";
 import { Navbar, Nav, Container, Button } from "react-bootstrap";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useCart } from "../store/CartContext";
@@ -8,10 +7,9 @@ function Navigation() {
   const { isLoggedIn, userEmail, logout } = useCart();
   const navigate = useNavigate();
 
-  // ✅ LOGUT FUNCTION - YAHAN HAI
   const handleLogout = () => {
-    logout(); // ✅ Token null + localStorage clear
-    navigate("/login"); // ✅ Redirect to login page
+    logout(); //  Token null + localStorage clear
+    navigate("/login"); // Redirect to login page
   };
 
   return (

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Modal, Button, Row, Col, Image } from "react-bootstrap";
 import { useCart } from "../store/CartContext";
 
