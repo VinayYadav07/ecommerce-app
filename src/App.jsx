@@ -6,7 +6,8 @@ import Products from "./components/Products";
 import ProductDetail from "./components/ProductDetail";
 import About from "./components/About";
 import ContactUs from "./components/ContactUs";
-import Signup from "./components/Signup"; // ✅ Import Signup
+import Signup from "./components/Signup";
+import Login from "./components/Login"; // ✅ Login import
 import { Container } from "react-bootstrap";
 import Cart from "./components/Cart";
 
@@ -33,10 +34,12 @@ function App() {
           <NavLink to="/contact" className="text-white me-3">
             CONTACT US
           </NavLink>
-          <NavLink to="/signup" className="text-white">
+          <NavLink to="/signup" className="text-white me-3">
             SIGN UP
-          </NavLink>{" "}
-          {/* ✅ Signup link */}
+          </NavLink>
+          <NavLink to="/login" className="text-white">
+            LOGIN
+          </NavLink>
         </nav>
 
         <Container className="py-4">
@@ -46,8 +49,8 @@ function App() {
             <Route path="/product/:id" element={<ProductDetail />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<ContactUs />} />
-            <Route path="/signup" element={<Signup />} />{" "}
-            {/* ✅ Signup route */}
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/login" element={<Login />} />
           </Routes>
         </Container>
       </CartProvider>

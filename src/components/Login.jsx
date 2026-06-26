@@ -10,13 +10,13 @@ import {
 } from "react-bootstrap";
 import { createClient } from "@supabase/supabase-js";
 
-// ✅ BAS YAHAN DO CHEEZE CHANGE KARO
+// ✅ Tumhari keys
 const supabaseUrl = "https://fsqrhukkqkuirglctmkj.supabase.co";
 const supabaseAnonKey = "sb_publishable_DfogggJlLwKWP8XzFSHYhQ_mrvbYOCa";
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-function Signup() {
+function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -30,14 +30,18 @@ function Signup() {
     setSuccess(false);
 
     try {
-      const { data, error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: email,
         password: password,
       });
 
       if (error) throw new Error(error.message);
 
-      console.log("Signup success:", data);
+      console.log("Login success:", data);
+
+      localStorage.setItem("token", data.session?.access_token || "");
+      localStorage.setItem("userEmail", data.user?.email || "");
+
       setSuccess(true);
       setEmail("");
       setPassword("");
@@ -52,7 +56,7 @@ function Signup() {
 
   return (
     <Container className="py-4">
-      <h2 className="text-center mb-4">Sign Up</h2>
+      <h2 className="text-center mb-4">Login</h2>
 
       <Row className="justify-content-center">
         <Col md={6}>
@@ -68,7 +72,7 @@ function Signup() {
               onClose={() => setSuccess(false)}
               dismissible
             >
-              Account created successfully! Please check your email.
+              Login successful!
             </Alert>
           )}
 
@@ -89,7 +93,7 @@ function Signup() {
               <Form.Label>Password</Form.Label>
               <Form.Control
                 type="password"
-                placeholder="Password (min 6 characters)"
+                placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -117,7 +121,7 @@ function Signup() {
                   Loading...
                 </>
               ) : (
-                "Sign Up"
+                "Login"
               )}
             </Button>
           </Form>
@@ -127,4 +131,4 @@ function Signup() {
   );
 }
 
-export default Signup;
+export default Login;
